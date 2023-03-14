@@ -1,4 +1,13 @@
 
 .git
-.env
 .idea/
+*.pyc
+__pycache__/
+*.pyo
+*.egg-info/
+dist/
+build/
+*.env
+*/migrations/*.py
+*/migrations/*.bak
+*/migrations/*.pyc

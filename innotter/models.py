@@ -44,6 +44,7 @@ class Page(models.Model):
     follow_requests = models.ManyToManyField('innotter.User', related_name='requests')
 
     unblock_date = models.DateTimeField(null=True, blank=True)
+    is_blocked = models.BooleanField(default=False)
 
 
 class Post(models.Model):
@@ -54,5 +55,5 @@ class Post(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # added
+
     likes = models.ManyToManyField('innotter.User', related_name='liked_posts')
