@@ -24,36 +24,3 @@ class JWTAuthentication(authentication.BaseAuthentication):
             return JsonResponse({'DRF_error': 'User does not exist'}, status=404)
         return (user, decoded_token)
 
-    # import jwt
-    # from rest_framework.authentication import BaseAuthentication
-    # from rest_framework.exceptions import AuthenticationFailed
-    # from innotter.models import User
-    #
-    # class JWTAuthentication(BaseAuthentication):
-    #     def authenticate(self, request):
-    #         # Получаем токен из заголовка авторизации
-    #         auth_header = request.headers.get('Authorization')
-    #         if not auth_header:
-    #             return None
-    #         auth_token = auth_header.split(' ')[1]
-    #
-    #         try:
-    #             # Декодируем токен
-    #             payload = jwt.decode(auth_token, 'SECRET_KEY', algorithms=['HS256'])
-    #         except jwt.exceptions.DecodeError:
-    #             raise AuthenticationFailed('Invalid token')
-    #         except jwt.exceptions.ExpiredSignatureError:
-    #             raise AuthenticationFailed('Token has expired')
-    #
-    #         # Получаем пользователя по ID из токена
-    #         try:
-    #             user = User.objects.get(id=payload['user_id'])
-    #         except User.DoesNotExist:
-    #             raise AuthenticationFailed('User not found')
-    #
-    #         # Возвращаем кортеж (user, token), который будет установлен в request.user и request.auth соответственно
-    #         return (user, auth_token)
-    #
-    #     def authenticate_header(self, request):
-    #         # Возвращаем значение заголовка, которое будет отправлено в ответ на 401 Unauthorized
-    #         return 'Bearer realm="api"'

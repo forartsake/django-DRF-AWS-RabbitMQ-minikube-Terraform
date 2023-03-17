@@ -12,18 +12,6 @@ class PageSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class OwnerPageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Page
-        fields = ('name', 'description', 'image')
-
-
-class AdminOrModeratorPageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Page
-        fields = ('is_blocked', 'unblock_date')
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
