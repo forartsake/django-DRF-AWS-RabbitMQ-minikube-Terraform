@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
+import datetime
 from pathlib import Path
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,16 +25,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 
 # Application definition
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework'
-]
 
 CORE_APPS = [
     'django.contrib.admin',
@@ -51,6 +41,7 @@ LOCAL_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'rest_framework',
 
 ]
 
@@ -65,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'innotter.middleware.JWTMiddleware',
 ]
 
 ROOT_URLCONF = 'pet_project.urls'
@@ -143,3 +135,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 AUTH_USER_MODEL = 'innotter.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.AllowAny',
+    # ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'innotter.authentication.JWTAuthentication',
+    ]
+}
+
+JWT_AUTH = {
+    'JWT_SECRET_KEY': os.getenv('SECRET_KEY'),
+    'JWT_ALGORITHM': os.getenv('JWT_ALGORITHM'),
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=float(os.getenv('WT_EXPIRATION_DELTA'))),
+    'JWT_AUTH_HEADER_PREFIX': os.getenv('JWT_AUTH_HEADER_PREFIX'),
+}
