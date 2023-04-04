@@ -9,6 +9,7 @@ from rest_framework import authentication
 class JWTAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
         header = request.headers.get('Authorization', None)
+
         if not header:
             return None
         token = header.split(' ')[1]
@@ -22,5 +23,8 @@ class JWTAuthentication(authentication.BaseAuthentication):
         user = User.objects.get(id=decoded_token['user_id'])
         if not user:
             return JsonResponse({'DRF_error': 'User does not exist'}, status=404)
+
         return (user, decoded_token)
+
+
 

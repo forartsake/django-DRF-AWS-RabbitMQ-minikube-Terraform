@@ -11,15 +11,19 @@ class JWTMiddleware:
 
     def __call__(self, request):
         header = request.headers.get('Authorization', None)
+
         if not header:
-            request.user = AnonymousUser()
+            # request.user = AnonymousUser()
             return self.get_response(request)
 
         try:
             token = header.split(' ')[1]
+
             decoded_token = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+
             user_id = decoded_token['user_id']
             user = User.objects.get(id=user_id)
+
             if not user:
                 return JsonResponse({'error': 'User does not exist'}, status=404)
             request.user = user

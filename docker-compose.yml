@@ -26,3 +26,39 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    volumes:
+      - .:/usr/src/django-docker
+
+  rabbitmq:
+    image: rabbitmq:3.9.29-management-alpine
+    container_name: pet_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    env_file:
+      - .env
+
+  celery_worker:
+    env_file:
+      - .env
+    depends_on:
+      - db_postgresql
+      - rabbitmq
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A pet_project.pet_celery worker -l info
+    container_name: pet_celery_worker
+    restart: always
+    volumes:
+      - .:/usr/src/django-docker
+
+  celery_flower:
+    image: mher/flower
+    container_name: pet_celery_flower
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    restart: always

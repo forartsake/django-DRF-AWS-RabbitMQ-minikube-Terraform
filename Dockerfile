@@ -15,6 +15,7 @@ RUN pip install -U pipenv
 
 RUN pipenv install --system
 
+RUN ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 
 COPY . .
 
@@ -22,4 +23,7 @@ EXPOSE 8000
 
 RUN chmod +x entrypoint.sh
 
+#RUN chmod +x celery.sh
+
 CMD ./entrypoint.sh
+#CMD ./celery.sh
