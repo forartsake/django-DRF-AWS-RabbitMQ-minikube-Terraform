@@ -1,4 +1,3 @@
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
@@ -20,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PageCreateSerializer(serializers.ModelSerializer):
     uuid = serializers.CharField(read_only=True)
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
+    owner = serializers.CharField(default=serializers.CurrentUserDefault())
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True, required=False)
 
     class Meta:
@@ -39,7 +38,7 @@ class TagSerializer(serializers.ModelSerializer):
 class CreateTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('name', 'id')
+        fields = ('name',)
 
 
 class PageSerializer(serializers.ModelSerializer):

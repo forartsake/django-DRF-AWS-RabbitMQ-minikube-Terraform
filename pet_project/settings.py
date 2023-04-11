@@ -86,6 +86,16 @@ WSGI_APPLICATION = 'pet_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv('DATABASE_ENGINE'),
+#         'HOST': os.getenv('DATABASE_HOST'),
+#         'USER': os.getenv('DATABASE_USER'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+#         'PORT': os.getenv('DATABASE_PORT'),
+#         'NAME': os.getenv('POSTGRES_DB'),
+#     },
+# }
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DATABASE_ENGINE'),

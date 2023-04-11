@@ -1,7 +1,4 @@
-import os
 from datetime import datetime, timedelta
-from time import timezone
-
 from django.core.validators import validate_image_file_extension
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
