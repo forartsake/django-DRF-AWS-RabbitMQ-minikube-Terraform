@@ -1,0 +1,14 @@
+
+.git
+.idea/
+*.pyc
+__pycache__/
+*.pyo
+*.egg-info/
+dist/
+build/
+*.env
+migrations/
+*/migrations/*.py
+*/migrations/*.bak
+*/migrations/*.pyc
