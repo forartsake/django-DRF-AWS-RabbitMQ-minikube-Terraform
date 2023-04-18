@@ -2,13 +2,14 @@ import os
 from datetime import datetime, timedelta
 
 import jwt
+import requests
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, serializers
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from innotter.models import Page, User, Post, Tag
@@ -46,7 +47,7 @@ class AuthService:
         if user:
             expiration_delta = int(os.getenv('WT_EXPIRATION_DELTA'))
             exp = (datetime.now() + timedelta(seconds=expiration_delta)).timestamp()
-            payload = {'user_id': user.id, 'exp': exp}
+            payload = {'user_id': user.id, 'exp': exp, 'username': username}
             secret_key = os.getenv('SECRET_KEY')
             token = jwt.encode(payload, secret_key, algorithm='HS256')
             return token
@@ -182,6 +183,7 @@ class PostService:
         post.likes.remove(user)
         post.save()
         return True, "Post has been unliked successfully."
+
 
 class NotificationService:
     email_subject = "Dear {}!"

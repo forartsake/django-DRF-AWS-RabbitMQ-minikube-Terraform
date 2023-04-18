@@ -26,6 +26,8 @@ django-celery-results = "*"
 pytest-django = "*"
 page = "*"
 kombu = "*"
+pika = "*"
+requests = "*"
 
 [dev-packages]
 kombu = "*"

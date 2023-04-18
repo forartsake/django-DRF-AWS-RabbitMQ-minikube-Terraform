@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets, status, generics
 from rest_framework.decorators import action, authentication_classes, permission_classes
@@ -12,8 +13,10 @@ from innotter.serializers import PageSerializer, UserSerializer, PostSerializer,
 from innotter.services.permissions.permissions import IsOwnerOrReadOnly, \
     IsOwnerOrAuthorityCanEdit, IsAdminOrReadOnly, OwnerCanEditOrAdminCanBlockUser, IsOwnerOnly, \
     IsOwnerCanEditPostOrReadOnly
+from innotter.services.rabbitmq_producer import send_to_fast_api
 from innotter.services.services import PageService, PostService, UserService, AuthService
 from rest_framework import filters
+import requests
 
 
 class UserViewSet(mixins.ListModelMixin,
