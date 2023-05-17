@@ -13,7 +13,7 @@ from innotter.serializers import PageSerializer, UserSerializer, PostSerializer,
 from innotter.services.permissions.permissions import IsOwnerOrReadOnly, \
     IsOwnerOrAuthorityCanEdit, IsAdminOrReadOnly, OwnerCanEditOrAdminCanBlockUser, IsOwnerOnly, \
     IsOwnerCanEditPostOrReadOnly
-from innotter.services.rabbitmq_producer import send_to_fast_api
+
 from innotter.services.services import PageService, PostService, UserService, AuthService
 from rest_framework import filters
 import requests
@@ -89,6 +89,7 @@ class PageViewSet(mixins.ListModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
                   GenericViewSet):
+
     queryset = Page.objects.all()
 
     @action(detail=True, methods=['post', 'delete'], serializer_class=CreateTagSerializer, name='modify_tag')
@@ -167,7 +168,7 @@ class PageViewSet(mixins.ListModelMixin,
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [IsAuthenticated()]
+            return [IsAuthenticated(), ]
         elif self.request.method in ('PUT', 'PATCH'):
             return [IsOwnerOrAuthorityCanEdit()]
         elif self.request.method == 'DELETE':

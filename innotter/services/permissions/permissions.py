@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -37,6 +38,24 @@ class IsOwnerOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
+
+
+
+class PageAccessPermission(BasePermission):
+    def has_permission(self, request, view):
+        print(f'has_perm: {request.user.is_authenticated}')
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        print('obj')
+        if request.user.role in ['ADMIN', 'MODERATOR'] or \
+                obj.owner == request.user or \
+                (request.user.role == 'USER' and not obj.is_private):
+            return True
+        return False
+
+
+
 
 
 class IsOwnerOrAuthorityCanEdit(permissions.BasePermission):
