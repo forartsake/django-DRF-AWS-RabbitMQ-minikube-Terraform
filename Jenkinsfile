@@ -5,7 +5,7 @@ pipeline {
         stage('Build Docker images') {
             steps {
                 script {
-                    sh "docker-compose build"
+                    sh "docker compose build"
                 }
             }
         }
