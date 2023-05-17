@@ -12,21 +12,12 @@ services:
       - .env
     volumes:
       - ./data/postgres:/var/lib/postgresql/data/
-    networks:
-      - django
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
 
   django_petproject:
     env_file:
       - .env
     depends_on:
-      db_postgresql:
-        condition: service_healthy
+      - db_postgresql
     build:
       context: .
       dockerfile: Dockerfile
@@ -36,8 +27,6 @@ services:
       - "8000:8000"
     volumes:
       - .:/usr/src/django-docker
-    networks:
-      - django
 
 #   rabbitmq:
 #     image: rabbitmq:3.9.29-management-alpine
