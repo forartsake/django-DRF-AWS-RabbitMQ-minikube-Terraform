@@ -15,11 +15,7 @@ services:
       - ./data/postgres:/var/lib/postgresql/data/
     networks:
       - django
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    
 
 
   django_petproject:
