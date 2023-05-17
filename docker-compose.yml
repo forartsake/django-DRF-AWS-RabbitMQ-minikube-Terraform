@@ -1,5 +1,4 @@
-
-version: "3.5"
+version: '3.5'
 
 services:
 
@@ -15,7 +14,11 @@ services:
       - ./data/postgres:/var/lib/postgresql/data/
     networks:
       - django
-    
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
   django_petproject:
@@ -36,48 +39,48 @@ services:
     networks:
       - django
 
- rabbitmq:
-   image: rabbitmq:3.9.29-management-alpine
-   container_name: pet_rabbitmq
-   ports:
-     - "5672:5672"
-     - "15672:15672"
-   restart: always
-   volumes:
-     - ./rabbitmq:/var/lib/rabbitmq/mnesia
-   env_file:
-     - .env
-   networks:
-     - django
+  rabbitmq:
+    image: rabbitmq:3.9.29-management-alpine
+    container_name: pet_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq/mnesia
+    env_file:
+      - .env
+    networks:
+      - django
 
- celery_worker:
-   env_file:
-     - .env
-   depends_on:
-     - db_postgresql
-     - rabbitmq
-   build:
-     context: .
-     dockerfile: Dockerfile
-   command: celery -A pet_project.pet_celery worker -l info
-   container_name: pet_celery_worker
-   restart: always
-   volumes:
-     - .:/usr/src/django-docker
-   networks:
-     - django
+  celery_worker:
+    env_file:
+      - .env
+    depends_on:
+      - db_postgresql
+      - rabbitmq
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A pet_project.pet_celery worker -l info
+    container_name: pet_celery_worker
+    restart: always
+    volumes:
+      - .:/usr/src/django-docker
+    networks:
+      - django
 
- celery_flower:
-   image: mher/flower
-   container_name: pet_celery_flower
-   env_file:
-     - .env
-   ports:
-     - "5555:5555"
-   restart: always
-   networks:
-     - django
+  celery_flower:
+    image: mher/flower
+    container_name: pet_celery_flower
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    restart: always
+    networks:
+      - django
 networks:
- django:
-   driver: bridge
-   name: django
+  django:
+    driver: bridge
+    name: django
