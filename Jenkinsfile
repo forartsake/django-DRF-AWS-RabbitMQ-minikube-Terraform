@@ -9,8 +9,8 @@ pipeline{
         stage('Test'){
             steps {
                 sh 'docker-compose build -up'
-                sh 'docker start django'
-                sh 'docker start postgresql'
+                sh 'docker start petproject'
+                sh 'docker start pet_postgres'
                 sh 'docker exec -i django apk add --no-cache bash'
                 sh 'docker exec -i django bash -c "pytest"'
                 }
