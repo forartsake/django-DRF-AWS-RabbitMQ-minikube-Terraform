@@ -1,14 +1,16 @@
-pipeline {
+pipeline{
     agent any
-    
     stages {
-        stage('Build Docker images') {
-            steps {
-                script {
-                    sh "docker compose build"
+        stage('Build'){
+            steps  {
+                sh 'docker-compose build'
                 }
             }
-        }
-    }
-}
+        stage('Test'){
+            steps {
+                sh 'docker-compose run django_petproject pytest'
 
+                }
+            }
+       }
+    }
