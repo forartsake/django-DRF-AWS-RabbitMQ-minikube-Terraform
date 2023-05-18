@@ -10,8 +10,6 @@ pipeline{
             steps {
                 sh 'docker compose up -d'
                 
-                sh 'sleep 10'
-                
                 sh 'docker compose run django_petproject python manage.py makemigrations'
                 sh 'docker compose run django_petproject python manage.py migrate'
                 
