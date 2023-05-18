@@ -8,6 +8,7 @@ pipeline{
             }
         stage('Test'){
             steps {
+                sh 'docker-compose run django_petproject python manage.py migrate'
                 sh 'docker compose run django_petproject pytest'
 
                 }
