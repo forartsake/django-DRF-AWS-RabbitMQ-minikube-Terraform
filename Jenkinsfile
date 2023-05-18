@@ -3,12 +3,12 @@ pipeline{
     stages {
         stage('Build'){
             steps  {
-                sh 'docker-compose build'
+                sh 'docker compose build'
                 }
             }
         stage('Test'){
             steps {
-                sh 'docker-compose run django_petproject pytest'
+                sh 'docker compose run django_petproject pytest'
 
                 }
             }
