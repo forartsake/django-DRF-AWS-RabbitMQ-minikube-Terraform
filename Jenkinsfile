@@ -1,25 +1,38 @@
 pipeline {
     agent any
-
+    
     stages {
         stage('Build') {
             steps {
                 script {
-                    // Проверка билда контейнеров
-                    docker.withRegistry('') {
-                        def dockerCompose = dockerComposeFile()
-                        dockerCompose.build()
+                    // Определение пути до файла docker-compose.yml
+                    def dockerComposeFile = './docker-compose.yml'
+                    
+                    // Запуск команды docker-compose up для сборки контейнеров
+                    sh "docker-compose -f ${dockerComposeFile} up -d"
+                    
+                    // Проверка статуса контейнеров
+                    def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
+                    
+                    // Проверка, успешно ли запущены все контейнеры
+                    if (containerStatus.trim().contains('running')) {
+                        echo 'Все контейнеры были успешно запущены.'
+                    } else {
+                        error 'Не удалось запустить все контейнеры.'
                     }
                 }
             }
         }
-
-        stage('Run Tests') {
-            steps {
-                script {
-                    // Запуск pytest на машине
-                    sh 'pytest'
-                }
+    }
+    
+    post {
+        always {
+            // Завершение и очистка контейнеров после выполнения пайплайна
+            script {
+                def dockerComposeFile = './docker-compose.yml'
+                
+                // Остановка и удаление контейнеров
+                sh "docker-compose -f ${dockerComposeFile} down"
             }
         }
     }
