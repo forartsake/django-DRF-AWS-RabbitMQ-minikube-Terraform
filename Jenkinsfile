@@ -39,7 +39,7 @@ pipeline {
                     sh "docker exec -i petproject python manage.py makemigrations"
                     sh "docker exec -i petproject python manage.py migrate"
                      // Проверка таблиц в базе данных
-                    def result = sh(script: 'docker exec -it pet_postgres psql -U postgres -c "SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\';"', returnStdout: true).trim()
+                    def result = sh(script: 'docker exec -i pet_postgres psql -U postgres -c "SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\';"', returnStdout: true).trim()
                     echo "Список таблиц в базе данных:"
                     echo result
                     // Запуск тестов с помощью pytest
