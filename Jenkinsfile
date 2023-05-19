@@ -12,7 +12,7 @@ pipeline {
                     sh "docker-compose -f ${dockerComposeFile} up -d"
                        // Ожидание некоторого времени, чтобы контейнеры успели запуститься
                     sleep 20
-
+                    
                     // Вывод журналов контейнеров
                     sh "docker-compose -f ${dockerComposeFile} logs"
 
@@ -44,6 +44,10 @@ pipeline {
                     }
                   
                     // Запуск тестов с помощью pytest
+                    sh "docker exec -i petproject makemigrations"
+                    sh "docker exec -i petproject migrate"
+                    sleep 10
+   
                     sh "docker exec -i petproject pytest"
                 }
             }
