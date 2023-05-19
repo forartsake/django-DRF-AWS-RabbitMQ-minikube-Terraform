@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {        
                     // Запуск тестов с помощью pytest
-                    sh 'innotter pytest'
+                    sh "docker exec -it petproject pytest"
                 }
             }
         }
