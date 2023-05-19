@@ -11,7 +11,7 @@ pipeline {
                     // Запуск команды docker-compose up для сборки контейнеров
                     sh "docker-compose -f ${dockerComposeFile} up -d"
                        // Ожидание некоторого времени, чтобы контейнеры успели запуститься
-                    sleep 10
+                    sleep 20
 
                     // Вывод журналов контейнеров
                     sh "docker-compose -f ${dockerComposeFile} logs"
