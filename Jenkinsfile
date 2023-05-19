@@ -1,23 +1,26 @@
-pipeline{
+pipeline {
     agent any
-    stages {
-        stage('Build'){
-            steps  {
-                sh 'docker-compose build'
-                }
-            }
-        stage('Test'){
-            steps {
-                sh 'docker-compose up -d'
-                
-                sh 'docker-compose run django_petproject python manage.py makemigrations'
-                sh 'docker-compose run django_petproject python manage.py migrate'
-                
-                sh 'docker-compose exec django_petproject pytest'
-                
-                sh 'docker-compose down'
 
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Проверка билда контейнеров
+                    docker.withRegistry('') {
+                        def dockerCompose = dockerComposeFile()
+                        dockerCompose.build()
+                    }
                 }
             }
-       }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Запуск pytest на машине
+                    sh 'pytest'
+                }
+            }
+        }
     }
+}
