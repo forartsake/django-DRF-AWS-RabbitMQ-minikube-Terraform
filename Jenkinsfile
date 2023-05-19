@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {        
                     // Запуск тестов с помощью pytest
-                    sh 'pytest'
+                    sh 'innotter pytest'
                 }
             }
         }
