@@ -23,6 +23,15 @@ pipeline {
                 }
             }
         }
+        
+        stage('Test') {
+            steps {
+                script {        
+                    // Запуск тестов с помощью pytest
+                    sh 'pytest'
+                }
+            }
+        }
     }
     
     post {
