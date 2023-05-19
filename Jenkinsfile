@@ -26,7 +26,15 @@ pipeline {
         
         stage('Test') {
             steps {
-                script {        
+                script { 
+                    // Проверка наличия контейнера с PostgreSQL
+                    def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
+                    
+                    if (postgresContainer) {
+                        echo "Контейнер с PostgreSQL запущен."
+                    } else {
+                        error "Контейнер с PostgreSQL не найден."
+                    }
                     // Запуск тестов с помощью pytest
                     sh "docker exec -i petproject pytest"
                 }
