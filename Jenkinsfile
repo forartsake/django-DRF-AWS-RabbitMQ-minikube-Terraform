@@ -33,7 +33,7 @@ pipeline {
                     if (postgresContainer) {
                         echo "Контейнер с PostgreSQL запущен."
                         // Вывод списка таблиц
-                        sh "docker exec -it pet_postgres psql -U postgres -c '\\dt'"
+                        sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
                     } else {
                         error "Контейнер с PostgreSQL не найден."
                     }
