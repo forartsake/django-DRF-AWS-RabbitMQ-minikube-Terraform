@@ -1,86 +1,87 @@
-version: '3.5'
+pipeline {
+    agent any
 
-services:
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Определение пути до файла docker-compose.yml
+                    def dockerComposeFile = './docker-compose.yml'
 
-  db_postgresql:
-    image: postgres:15.2-alpine
-    restart: always
-    container_name: pet_postgres
-    ports:
-      - "54321:5432"
-    env_file:
-      - .env
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data/
-    networks:
-      - django
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+                    // Запуск команды docker-compose up для сборки контейнеров
+                    sh "docker-compose -f ${dockerComposeFile} up -d"
+                       // Ожидание некоторого времени, чтобы контейнеры успели запуститься
 
 
-  django_petproject:
-    env_file:
-      - .env
-    depends_on:
-      db_postgresql:
-        condition: service_healthy
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: petproject
-    restart: always
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/usr/src/django-docker
-    networks:
-      - django
+                    // Вывод журналов контейнеров
+                    sh "docker-compose -f ${dockerComposeFile} logs"
 
-  rabbitmq:
-    image: rabbitmq:3.9.29-management-alpine
-    container_name: pet_rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    restart: always
-    volumes:
-      - ./rabbitmq:/var/lib/rabbitmq/mnesia
-    env_file:
-      - .env
-    networks:
-      - django
+                    // Проверка статуса контейнеров
+                    def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
 
-  celery_worker:
-    env_file:
-      - .env
-    depends_on:
-      - db_postgresql
-      - rabbitmq
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A pet_project.pet_celery worker -l info
-    container_name: pet_celery_worker
-    restart: always
-    volumes:
-      - .:/usr/src/django-docker
-    networks:
-      - django
+                    // Проверка, успешно ли запущены все контейнеры
+                    if (containerStatus.trim().contains('running')) {
+                        echo 'Все контейнеры были успешно запущены.'
+                    } else {
+                        error 'Не удалось запустить все контейнеры.'
+                    }
+                }
+            }
+        }
 
-  celery_flower:
-    image: mher/flower
-    container_name: pet_celery_flower
-    env_file:
-      - .env
-    ports:
-      - "5555:5555"
-    restart: always
-    networks:
-      - django
-networks:
-  django:
-    driver: bridge
-    name: django
+        stage('Test') {
+            steps {
+                script {
+                    // Проверка наличия контейнера с PostgreSQL
+                    def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
+
+                    if (postgresContainer) {
+                        echo "Контейнер с PostgreSQL запущен."
+                        // Вывод списка таблиц
+                        sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
+                    } else {
+                        error "Контейнер с PostgreSQL не найден."
+                    }
+                    sh 'sleep 15'
+                    // Запуск тестов с помощью pytest
+                    sh "docker exec -i petproject python manage.py makemigrations"
+                    sh "docker exec -i petproject python manage.py migrate"
+                    sh "docker exec -i petproject python manage.py migrate django_celery_results"
+
+
+                    sh "docker exec -i petproject pytest"
+                }
+            }
+        }
+    }
+        stage('Publish to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
+                            def dockerImage = docker.image('pet_innotter')
+
+                            // Логин в Docker Hub
+                            docker.login(username: forartsake, password: Kn881271014)
+
+                            // Загрузка образа в Docker Hub
+                            dockerImage.push()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Завершение и очистка контейнеров после выполнения пайплайна
+            script {
+                def dockerComposeFile = './docker-compose.yml'
+
+                // Остановка и удаление контейнеров
+                sh "docker-compose -f ${dockerComposeFile} down"
+            }
+        }
+    }
+}
