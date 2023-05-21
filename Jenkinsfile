@@ -58,21 +58,21 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
-                            def dockerImage = docker.image('pet_innotter')
-
-                            // Логин в Docker Hub
-                            docker.login(username: forartsake, password: Kn881271014)
-
-                            // Загрузка образа в Docker Hub
-                            dockerImage.push()
-                        }
-                    }
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
+                    def dockerImage = docker.image('pet_innotter')
+    
+                     // Логин в Docker Hub
+                    docker.login(username: X, password: X)
+    
+                    // Загрузка образа в Docker Hub
+                    dockerImage.push()
                 }
+              }
             }
+          }
         }
-    }
-
+    
+    
     post {
         always {
             // Завершение и очистка контейнеров после выполнения пайплайна
