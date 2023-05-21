@@ -52,25 +52,21 @@ pipeline {
             }
         }
 
-        stage('Publish to Docker Hub') {
+        stage('Build Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
-                            def dockerImage = docker.image('pet_innotter')
-
-                            // Логин в Docker Hub
-                            docker.login(username: X, password: X)
-
-                            // Загрузка образа в Docker Hub
-                            dockerImage.push()
+                   dockerImage = docker.build("pet_innotter:latest")
                         }
                     }
                 }
+  
+        
+       stage('Push image') {
+            withDockerRegistry([ credentialsId: "docker-hub-credentials", url: "" ]) {
+            dockerImage.push()
             }
-        }
+        }    
     }
-
     post {
         always {
             // Завершение и очистка контейнеров после выполнения пайплайна
