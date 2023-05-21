@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    environment {
-    DOCKERHUB_CREDENTIALS = credentials('dockerhubaccount')
-    }
     stages {
         stage('Build') {
             steps {
@@ -54,23 +51,26 @@ pipeline {
             }
         }
 
-       stages {
-            stage('Build') {
+       stage('Build Docker Image') {
             steps {
-            sh 'docker build -t forartsake/jenkins-docker-hub .'
-            }
+                sh 'docker build -t forartsake/petinnowise:latest .'
+             }
         }
-        stage('Login') {
-            steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-            }
+
+      stage('Docker Login') {
+           steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
         }
-    stage('Push') {
-      steps {
-        sh 'docker push lloydmatereke/jenkins-docker-hub'
-      }
     }
-  }
+}
+
+stage('Push Docker Image') {
+    steps {
+        sh 'docker forartsake/petinnowise:latest'
+    }
+}
+
     post {
         always {
             // Завершение и очистка контейнеров после выполнения пайплайна
@@ -79,7 +79,7 @@ pipeline {
 
                 // Остановка и удаление контейнеров
                 sh "docker-compose -f ${dockerComposeFile} down"
-                sh 'docker logout'
+
             }
         }
     }
