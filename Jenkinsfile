@@ -9,11 +9,11 @@ pipeline {
                     def dockerComposeFile = './docker-compose.yml'
 
                     // Запуск команды docker-compose up для сборки контейнеров
-                    sh "docker compose -f ${dockerComposeFile} up -d"
+                    sh "docker-compose -f ${dockerComposeFile} up -d"
                     // Ожидание некоторого времени, чтобы контейнеры успели запуститься
 
                     // Вывод журналов контейнеров
-                    sh "docker compose -f ${dockerComposeFile} logs"
+                    sh "docker-compose -f ${dockerComposeFile} logs"
 
                     // Проверка статуса контейнеров
                     def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
@@ -60,7 +60,7 @@ pipeline {
                             def dockerImage = docker.image('pet_innotter')
 
                             // Логин в Docker Hub
-                            docker.login(username: X, password: X)
+                            docker.login(username: env.DOCKER_USERNAME, password: env.DOCKER_PASSWORD)
 
                             // Загрузка образа в Docker Hub
                             dockerImage.push()
