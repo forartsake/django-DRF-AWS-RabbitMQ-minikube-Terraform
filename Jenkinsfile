@@ -51,25 +51,13 @@ pipeline {
                 }
             }
         }
-
-        stage('Publish to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                            def dockerImage = docker.image('pet_innotter')
-
-                            // Логин в Docker Hub
-                            docker.login(username: env.DOCKER_USERNAME, password: env.DOCKER_PASSWORD)
-
-                            // Загрузка образа в Docker Hub
-                            dockerImage.push()
-                        }
-                    }
-                }
+        stage(Publish to Docker Hub') {
+            withDockerRegistry([ credentialsId: "docker-hub-credentials", url: "" ]) {
+            dockerImage.push()
             }
-        }
+        }    
     }
+
 
     post {
         always {
