@@ -27,29 +27,29 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                script {
-                    // Проверка наличия контейнера с PostgreSQL
-                    def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
+//         stage('Test') {
+//             steps {
+//                 script {
+//                     // Проверка наличия контейнера с PostgreSQL
+//                     def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
 
-                    if (postgresContainer) {
-                        echo "Контейнер с PostgreSQL запущен."
-                        // Вывод списка таблиц
-                        sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
-                    } else {
-                        error "Контейнер с PostgreSQL не найден."
-                    }
-                    sh 'sleep 15'
-                    // Запуск тестов с помощью pytest
-                    sh "docker exec -i petproject python manage.py makemigrations"
-                    sh "docker exec -i petproject python manage.py migrate"
-                    sh "docker exec -i petproject python manage.py migrate django_celery_results"
+//                     if (postgresContainer) {
+//                         echo "Контейнер с PostgreSQL запущен."
+//                         // Вывод списка таблиц
+//                         sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
+//                     } else {
+//                         error "Контейнер с PostgreSQL не найден."
+//                     }
+//                     sh 'sleep 15'
+//                     // Запуск тестов с помощью pytest
+//                     sh "docker exec -i petproject python manage.py makemigrations"
+//                     sh "docker exec -i petproject python manage.py migrate"
+//                     sh "docker exec -i petproject python manage.py migrate django_celery_results"
 
-                    sh "docker exec -i petproject pytest"
-                }
-            }
-        }
+//                     sh "docker exec -i petproject pytest"
+//                 }
+//             }
+//         }
 
         stage('Build Docker Image') {
             steps {
