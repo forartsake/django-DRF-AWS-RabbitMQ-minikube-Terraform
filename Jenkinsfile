@@ -54,7 +54,7 @@ pipeline {
 
         stage('Publish to Docker Hub') {
             steps {
-                docker.withRegistry( '', 'docker-hub-credentials' ) {
+                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
                 def dockerImage = docker.image('pet_innotter')
                 dockerImage.push()
                 }
