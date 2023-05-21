@@ -46,6 +46,7 @@ pipeline {
                     // Запуск тестов с помощью pytest
                     sh "docker exec -i petproject python manage.py makemigrations"
                     sh "docker exec -i petproject python manage.py migrate"
+                    sh "docker exec -i petproject python manage.py migrate django_celery_results"
                     
    
                     sh "docker exec -i petproject pytest"
