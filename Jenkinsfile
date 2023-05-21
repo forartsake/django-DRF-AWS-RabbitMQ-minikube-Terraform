@@ -9,14 +9,14 @@ pipeline {
                     def dockerComposeFile = './docker-compose.yml'
 
                     // Запуск команды docker-compose up для сборки контейнеров
-                    sh "docker-compose -f ${dockerComposeFile} up -d"
+                    sh "docker compose -f ${dockerComposeFile} up -d"
                     // Ожидание некоторого времени, чтобы контейнеры успели запуститься
 
                     // Вывод журналов контейнеров
-                    sh "docker-compose -f ${dockerComposeFile} logs"
+                    sh "docker compose -f ${dockerComposeFile} logs"
 
                     // Проверка статуса контейнеров
-                    def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
+                    def containerStatus = sh(script: "docker compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
 
                     // Проверка, успешно ли запущены все контейнеры
                     if (containerStatus.trim().contains('running')) {
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                     // Проверка наличия контейнера с PostgreSQL
-                    def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
+                    def postgresContainer = sh(script: "docker compose ps -q db_postgresql", returnStdout: true).trim()
 
                     if (postgresContainer) {
                         echo "Контейнер с PostgreSQL запущен."
@@ -51,14 +51,16 @@ pipeline {
                 }
             }
         }
-        stage('Publish to Docker Hub') {
-            withDockerRegistry([ credentialsId: "docker-hub-credentials", url: "" ]) {
-                def dockerImage = docker.image('pet_innotter')
-                dockerImage.push()
-            }
-        }    
-    }
 
+        stage('Publish to Docker Hub') {
+            steps {
+                withDockerRegistry([credentialsId: "docker-hub-credentials", url: ""]) {
+                    def dockerImage = docker.image('pet_innotter')
+                    dockerImage.push()
+                }
+            }
+        }
+    }
 
     post {
         always {
@@ -67,7 +69,7 @@ pipeline {
                 def dockerComposeFile = './docker-compose.yml'
 
                 // Остановка и удаление контейнеров
-                sh "docker-compose -f ${dockerComposeFile} down"
+                sh "docker compose -f ${dockerComposeFile} down"
             }
         }
     }
