@@ -42,7 +42,7 @@ pipeline {
                     } else {
                         error "Контейнер с PostgreSQL не найден."
                     }
-                  
+                    sh 'sleep 30'
                     // Запуск тестов с помощью pytest
                     sh "docker exec -i petproject python manage.py makemigrations"
                     sh "docker exec -i petproject python manage.py migrate"
