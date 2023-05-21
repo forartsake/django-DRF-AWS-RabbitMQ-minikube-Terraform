@@ -10,7 +10,8 @@ pipeline {
 
                     // Запуск команды docker-compose up для сборки контейнеров
                     sh "docker compose -f ${dockerComposeFile} up -d"
-                    // Ожидание некоторого времени, чтобы контейнеры успели запуститься
+                       // Ожидание некоторого времени, чтобы контейнеры успели запуститься
+
 
                     // Вывод журналов контейнеров
                     sh "docker compose -f ${dockerComposeFile} logs"
@@ -47,11 +48,12 @@ pipeline {
                     sh "docker exec -i petproject python manage.py migrate"
                     sh "docker exec -i petproject python manage.py migrate django_celery_results"
 
+
                     sh "docker exec -i petproject pytest"
                 }
             }
         }
-
+    }
         stage('Publish to Docker Hub') {
             steps {
                 withDockerRegistry([credentialsId: "docker-hub-credentials", url: ""]) {
@@ -61,6 +63,7 @@ pipeline {
             }
         }
     }
+
 
     post {
         always {
