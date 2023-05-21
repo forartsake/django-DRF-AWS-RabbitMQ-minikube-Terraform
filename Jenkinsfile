@@ -51,9 +51,10 @@ pipeline {
                 }
             }
         }
-        stage(Publish to Docker Hub') {
+        stage('Publish to Docker Hub') {
             withDockerRegistry([ credentialsId: "docker-hub-credentials", url: "" ]) {
-            dockerImage.push()
+                def dockerImage = docker.image('pet_innotter')
+                dockerImage.push()
             }
         }    
     }
