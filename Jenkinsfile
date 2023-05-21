@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhubaccount')
+    }
     stages {
         stage('Build') {
             steps {
@@ -27,7 +29,7 @@ pipeline {
                 }
             }
         }
-
+    
         stage('Test') {
             steps {
                 script {
@@ -52,21 +54,23 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+       stages {
+            stage('Build') {
             steps {
-                script {
-                   dockerImage = docker.build("pet_innotter:latest")
-                        }
-                    }
-                }
-  
-        
-       stage('Push image') {
-            withDockerRegistry([ credentialsId: "dockerhubaccount", url: "" ]) {
-            dockerImage.push()
+            sh 'docker build -t forartsake/jenkins-docker-hub .'
             }
-        }    
+        }
+        stage('Login') {
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
+        }
+    stage('Push') {
+      steps {
+        sh 'docker push lloydmatereke/jenkins-docker-hub'
+      }
     }
+  }
     post {
         always {
             // Завершение и очистка контейнеров после выполнения пайплайна
@@ -75,6 +79,7 @@ pipeline {
 
                 // Остановка и удаление контейнеров
                 sh "docker-compose -f ${dockerComposeFile} down"
+                sh 'docker logout'
             }
         }
     }
