@@ -8,7 +8,7 @@ pipeline {
                     def dockerComposeFile = './docker-compose.yml'
 
                     // Запуск команды docker-compose up для сборки контейнеров
-                    sh "docker-compose -f ${dockerComposeFile} up -d"
+                    sh "sudo docker-compose -f ${dockerComposeFile} up -d"
                     // Ожидание некоторого времени, чтобы контейнеры успели запуститься
 
                     // Вывод журналов контейнеров
