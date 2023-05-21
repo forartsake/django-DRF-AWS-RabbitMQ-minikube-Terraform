@@ -62,7 +62,7 @@ pipeline {
   
         
        stage('Push image') {
-            withDockerRegistry([ credentialsId: "docker-hub-credentials", url: "" ]) {
+            withDockerRegistry([ credentialsId: "dockerhubaccount", url: "" ]) {
             dockerImage.push()
             }
         }    
