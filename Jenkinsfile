@@ -56,7 +56,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
+                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
                             def dockerImage = docker.image('pet_innotter')
 
                             // Логин в Docker Hub
