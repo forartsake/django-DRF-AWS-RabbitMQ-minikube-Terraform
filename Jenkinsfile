@@ -1,31 +1,31 @@
 pipeline {
     agent any
     stages {
-        stage('Build') {
-            steps {
-                script {
-                    // Определение пути до файла docker-compose.yml
-                    def dockerComposeFile = './docker-compose.yml'
+//         stage('Build') {
+//             steps {
+//                 script {
+//                     // Определение пути до файла docker-compose.yml
+//                     def dockerComposeFile = './docker-compose.yml'
 
-                    // Запуск команды docker-compose up для сборки контейнеров
-                    sh "sudo docker-compose -f ${dockerComposeFile} up -d"
-                    // Ожидание некоторого времени, чтобы контейнеры успели запуститься
+//                     // Запуск команды docker-compose up для сборки контейнеров
+//                     sh "sudo docker-compose -f ${dockerComposeFile} up -d"
+//                     // Ожидание некоторого времени, чтобы контейнеры успели запуститься
 
-                    // Вывод журналов контейнеров
-                    sh "docker-compose -f ${dockerComposeFile} logs"
+//                     // Вывод журналов контейнеров
+//                     sh "docker-compose -f ${dockerComposeFile} logs"
 
-                    // Проверка статуса контейнеров
-                    def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
+//                     // Проверка статуса контейнеров
+//                     def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
 
-                    // Проверка, успешно ли запущены все контейнеры
-                    if (containerStatus.trim().contains('running')) {
-                        echo 'Все контейнеры были успешно запущены.'
-                    } else {
-                        error 'Не удалось запустить все контейнеры.'
-                    }
-                }
-            }
-        }
+//                     // Проверка, успешно ли запущены все контейнеры
+//                     if (containerStatus.trim().contains('running')) {
+//                         echo 'Все контейнеры были успешно запущены.'
+//                     } else {
+//                         error 'Не удалось запустить все контейнеры.'
+//                     }
+//                 }
+//             }
+//         }
 
 //         stage('Test') {
 //             steps {
