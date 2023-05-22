@@ -166,7 +166,7 @@ JWT_AUTH = {
     'JWT_ALGORITHM': os.getenv('JWT_ALGORITHM'),
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=float(os.getenv('WT_EXPIRATION_DELTA'))),
+#     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=float(os.getenv('WT_EXPIRATION_DELTA'))),
     'JWT_AUTH_HEADER_PREFIX': os.getenv('JWT_AUTH_HEADER_PREFIX'),
 }
 
