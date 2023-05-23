@@ -1,27 +1,74 @@
 pipeline {
     agent any
     stages {
-        stage('Build and Push Docker Images') {
+        stage('Build') {
             steps {
                 script {
-                    def services = ['db_postgresql', 'django_petproject', 'rabbitmq', 'celery_worker', 'celery_flower']
+                    // Определение пути до файла docker-compose.yml
+                    def dockerComposeFile = './docker-compose.yml'
 
-                    stage('Docker Login') {
-                        withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                            sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                        }
-                    }
+                    // Запуск команды docker-compose up для сборки контейнеров
+                    sh "sudo docker-compose -f ${dockerComposeFile} up -d"
+                    // Ожидание некоторого времени, чтобы контейнеры успели запуститься
 
-                    for (service in services) {
-                        stage("Build ${service}") {
-                            sh "sudo docker-compose build ${service}"
-                        }
+                    // Вывод журналов контейнеров
+                    sh "docker-compose -f ${dockerComposeFile} logs"
 
-                        stage("Push ${service}") {
-                            sh "docker-compose push ${service}"
-                        }
+                    // Проверка статуса контейнеров
+                    def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
+
+                    // Проверка, успешно ли запущены все контейнеры
+                    if (containerStatus.trim().contains('running')) {
+                        echo 'Все контейнеры были успешно запущены.'
+                    } else {
+                        error 'Не удалось запустить все контейнеры.'
                     }
                 }
+            }
+        }
+
+//         stage('Test') {
+//             steps {
+//                 script {
+//                     // Проверка наличия контейнера с PostgreSQL
+//                     def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
+
+//                     if (postgresContainer) {
+//                         echo "Контейнер с PostgreSQL запущен."
+//                         // Вывод списка таблиц
+//                         sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
+//                     } else {
+//                         error "Контейнер с PostgreSQL не найден."
+//                     }
+//                     sh 'sleep 15'
+//                     // Запуск тестов с помощью pytest
+//                     sh "docker exec -i petproject python manage.py makemigrations"
+//                     sh "docker exec -i petproject python manage.py migrate"
+//                     sh "docker exec -i petproject python manage.py migrate django_celery_results"
+
+//                     sh "docker exec -i petproject pytest"
+//                 }
+//             }
+//         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'pwd' // Вывод текущего каталога
+                sh 'sudo docker-compose build -t forartsake/petinnowise:latest .'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker-compose push forartsake/petinnowise:latest'
             }
         }
     }
