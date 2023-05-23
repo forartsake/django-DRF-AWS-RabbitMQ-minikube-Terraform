@@ -14,7 +14,7 @@ pipeline {
 
                     for (service in services) {
                         stage("Build ${service}") {
-                            sh "docker-compose build ${service}"
+                            sh "sudo docker-compose build ${service}"
                         }
 
                         stage("Push ${service}") {
