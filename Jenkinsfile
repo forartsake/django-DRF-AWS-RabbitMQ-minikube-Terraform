@@ -1,80 +1,30 @@
 pipeline {
     agent any
     stages {
-//         stage('Build') {
-//             steps {
-//                 script {
-//                     // Определение пути до файла docker-compose.yml
-//                     def dockerComposeFile = './docker-compose.yml'
-
-//                     // Запуск команды docker-compose up для сборки контейнеров
-//                     sh "sudo docker-compose -f ${dockerComposeFile} up -d"
-//                     // Ожидание некоторого времени, чтобы контейнеры успели запуститься
-
-//                     // Вывод журналов контейнеров
-//                     sh "docker-compose -f ${dockerComposeFile} logs"
-
-//                     // Проверка статуса контейнеров
-//                     def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
-
-//                     // Проверка, успешно ли запущены все контейнеры
-//                     if (containerStatus.trim().contains('running')) {
-//                         echo 'Все контейнеры были успешно запущены.'
-//                     } else {
-//                         error 'Не удалось запустить все контейнеры.'
-//                     }
-//                 }
-//             }
-//         }
-
-//         stage('Test') {
-//             steps {
-//                 script {
-//                     // Проверка наличия контейнера с PostgreSQL
-//                     def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
-
-//                     if (postgresContainer) {
-//                         echo "Контейнер с PostgreSQL запущен."
-//                         // Вывод списка таблиц
-//                         sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
-//                     } else {
-//                         error "Контейнер с PostgreSQL не найден."
-//                     }
-//                     sh 'sleep 15'
-//                     // Запуск тестов с помощью pytest
-//                     sh "docker exec -i petproject python manage.py makemigrations"
-//                     sh "docker exec -i petproject python manage.py migrate"
-//                     sh "docker exec -i petproject python manage.py migrate django_celery_results"
-
-//                     sh "docker exec -i petproject pytest"
-//                 }
-//             }
-//         }
-
         stage('Build and Push Docker Images') {
             steps {
-                 script {
+                script {
                     def services = ['db_postgresql', 'django_petproject', 'rabbitmq', 'celery_worker', 'celery_flower']
 
                     stage('Docker Login') {
                         withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                             sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                            }
-                         }
+                        }
+                    }
 
-            for (service in services) {
-                stage("Build ${service}") {
-                    sh "docker-compose build ${service}"
-                }
+                    for (service in services) {
+                        stage("Build ${service}") {
+                            sh "docker-compose build ${service}"
+                        }
 
-                stage("Push ${service}") {
-                    sh "docker-compose push ${service}"
+                        stage("Push ${service}") {
+                            sh "docker-compose push ${service}"
+                        }
+                    }
                 }
             }
         }
     }
-}
-
 
     post {
         always {
