@@ -1,87 +1,39 @@
 pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps {
-                script {
-                    // Определение пути до файла docker-compose.yml
-                    def dockerComposeFile = './docker-compose.yml'
+  agent any
 
-                    // Запуск команды docker-compose up для сборки контейнеров
-                    sh "sudo docker-compose -f ${dockerComposeFile} up -d"
-                    // Ожидание некоторого времени, чтобы контейнеры успели запуститься
-
-                    // Вывод журналов контейнеров
-                    sh "docker-compose -f ${dockerComposeFile} logs"
-
-                    // Проверка статуса контейнеров
-                    def containerStatus = sh(script: "docker-compose -f ${dockerComposeFile} ps -q | xargs docker inspect -f '{{ .State.Status }}'", returnStdout: true)
-
-                    // Проверка, успешно ли запущены все контейнеры
-                    if (containerStatus.trim().contains('running')) {
-                        echo 'Все контейнеры были успешно запущены.'
-                    } else {
-                        error 'Не удалось запустить все контейнеры.'
-                    }
-                }
-            }
+  stages {
+    stage('Docker Login') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+          sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
         }
-
-//         stage('Test') {
-//             steps {
-//                 script {
-//                     // Проверка наличия контейнера с PostgreSQL
-//                     def postgresContainer = sh(script: "docker-compose ps -q db_postgresql", returnStdout: true).trim()
-
-//                     if (postgresContainer) {
-//                         echo "Контейнер с PostgreSQL запущен."
-//                         // Вывод списка таблиц
-//                         sh "docker exec -i pet_postgres psql -U postgres -c '\\dt'"
-//                     } else {
-//                         error "Контейнер с PostgreSQL не найден."
-//                     }
-//                     sh 'sleep 15'
-//                     // Запуск тестов с помощью pytest
-//                     sh "docker exec -i petproject python manage.py makemigrations"
-//                     sh "docker exec -i petproject python manage.py migrate"
-//                     sh "docker exec -i petproject python manage.py migrate django_celery_results"
-
-//                     sh "docker exec -i petproject pytest"
-//                 }
-//             }
-//         }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'pwd' // Вывод текущего каталога
-                sh 'sudo docker-compose build forartsake/petinnowise:latest .'
-            }
-        }
-
-        stage('Docker Login') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                sh 'docker-compose push forartsake/petinnowise:latest'
-            }
-        }
+      }
     }
 
-    post {
-        always {
-            // Завершение и очистка контейнеров после выполнения пайплайна
-            script {
-                def dockerComposeFile = './docker-compose.yml'
-
-                // Остановка и удаление контейнеров
-                sh "docker-compose -f ${dockerComposeFile} down"
-            }
-        }
+    stage('Build') {
+      steps {
+        sh 'docker-compose build'
+      }
     }
+
+    stage('Rename') {
+      steps {
+        sh 'docker tag db_postgresql:latest forartsake/db_postgresql:latest'
+        sh 'docker tag django_petproject:latest forartsake/django_petproject:latest'
+        sh 'docker tag rabbitmq:latest forartsake/rabbitmq:latest'
+        sh 'docker tag celery_worker:latest forartsake/celery_worker:latest'
+        sh 'docker tag celery_flower:latest forartsake/celery_flower:latest'
+      }
+    }
+
+    stage('Push') {
+      steps {
+        sh 'docker push forartsake/db_postgresql:latest'
+        sh 'docker push forartsake/django_petproject:latest'
+        sh 'docker push forartsake/rabbitmq:latest'
+        sh 'docker push forartsake/celery_worker:latest'
+        sh 'docker push forartsake/celery_flower:latest'
+      }
+    }
+  }
 }
