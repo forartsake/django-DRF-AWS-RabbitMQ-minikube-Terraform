@@ -54,7 +54,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh 'pwd' // Вывод текущего каталога
-                sh 'sudo docker-compose build -t forartsake/petinnowise:latest .'
+                sh 'sudo docker-compose build forartsake/petinnowise:latest .'
             }
         }
 
