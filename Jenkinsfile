@@ -51,27 +51,30 @@ pipeline {
 //             }
 //         }
 
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Images') {
             steps {
-                sh 'pwd' // Вывод текущего каталога
-                sh 'sudo docker build -t forartsake/petinnowise:latest .'
-            }
-        }
+                 script {
+                    def services = ['db_postgresql', 'django_petproject', 'rabbitmq', 'celery_worker', 'celery_flower']
 
-        stage('Docker Login') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    stage('Docker Login') {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhubaccount', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                            sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                            }
+                         }
+
+            for (service in services) {
+                stage("Build ${service}") {
+                    sh "docker-compose build ${service}"
+                }
+
+                stage("Push ${service}") {
+                    sh "docker-compose push ${service}"
                 }
             }
         }
-
-        stage('Push Docker Image') {
-            steps {
-                sh 'docker push forartsake/petinnowise:latest'
-            }
-        }
     }
+}
+
 
     post {
         always {
