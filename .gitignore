@@ -12,3 +12,5 @@ migrations/
 */migrations/*.py
 */migrations/*.bak
 */migrations/*.pyc
+configmap.yaml
+env_minikube.yaml

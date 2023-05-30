@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pet-project-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pet-project
+  template:
+    metadata:
+      labels:
+        app: pet-project
+    spec:
+      containers:
+        - name: db-postgresql
+          image: postgres:15.2-alpine
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: my-app-env
+
+        - name: django-petproject
+          image: forartsake/django_petproject:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: my-app-env
+
+        - name: rabbitmq
+          image: rabbitmq:3.9.29-management-alpine
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+
+        - name: celery-worker
+          image: forartsake/celery_worker:latest
+          ports:
+            - containerPort: 5555
+          command: ["celery", "-A", "pet_project.pet_celery", "worker", "-l", "info"]
+          envFrom:
+            - configMapRef:
+                name: my-app-env
+
+      volumes:
+        - name: postgres-data
+          emptyDir: {}
+        - name: django-data
+          emptyDir: {}
+
